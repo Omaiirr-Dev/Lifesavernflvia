@@ -733,15 +733,26 @@
                     continue;
                 }
 
-                // Parse time and match lines
-                const timeMatch = line.match(/^(\d{1,2}):(\d{2})(am|pm)$/i);
-                if (timeMatch && currentDate) {
-                    let hours = parseInt(timeMatch[1]);
-                    const minutes = timeMatch[2];
-                    const period = timeMatch[3].toLowerCase();
+                // Parse time and match lines (supports both 12-hour and 24-hour format)
+                const timeMatch12 = line.match(/^(\d{1,2}):(\d{2})(am|pm)$/i);
+                const timeMatch24 = line.match(/^(\d{1,2}):(\d{2})$/);
+                
+                if ((timeMatch12 || timeMatch24) && currentDate) {
+                    let hours, minutes;
                     
-                    if (period === 'pm' && hours !== 12) hours += 12;
-                    if (period === 'am' && hours === 12) hours = 0;
+                    if (timeMatch12) {
+                        // 12-hour format (e.g., "1:00pm")
+                        hours = parseInt(timeMatch12[1]);
+                        minutes = timeMatch12[2];
+                        const period = timeMatch12[3].toLowerCase();
+                        
+                        if (period === 'pm' && hours !== 12) hours += 12;
+                        if (period === 'am' && hours === 12) hours = 0;
+                    } else {
+                        // 24-hour format (e.g., "13:00")
+                        hours = parseInt(timeMatch24[1]);
+                        minutes = timeMatch24[2];
+                    }
                     
                     const startTime = `${currentDate} ${hours.toString().padStart(2, '0')}:${minutes}:00`;
                     
